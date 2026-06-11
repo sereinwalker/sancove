@@ -1,0 +1,91 @@
+name: 构建与发布
+
+on:
+  push:
+    tags:
+      - 'v*'   # 推送 v1.0.0, v0.2.0 等标签时触发
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        target:
+          - windows-msvc
+          # 后续可添加: ubuntu-latest, macos-latest
+        include:
+          - target: windows-msvc
+            os: windows-latest
+            suffix: .exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Rust 工具链
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 缓存 Cargo 依赖
+        uses: Swatinem/rust-cache@v2
+
+      - name: Release 构建
+        run: cargo build --release
+
+      - name: 收集二进制文件
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          cp target/release/sancove${{ matrix.suffix }} artifacts/
+          # 复制说明文件
+          cp README.md artifacts/ 2>/dev/null || true
+
+      - name: 打包 (ZIP)
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          filename: sancove-${{ matrix.target }}.zip
+          directory: artifacts
+
+      - name: 上传发布包
+        uses: actions/upload-artifact@v4
+        with:
+          name: sancove-${{ matrix.target }}
+          path: artifacts/sancove-*.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 下载所有构建产物
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: 创建 Release 并上传资产
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "release-assets/*/*.zip"
+          tag: ${{ github.ref_name }}
+          name: "sancove ${{ github.ref_name }}"
+          body: |
+            ## 基于国密算法的保密文件库 — ${{ github.ref_name }}
+
+            ### 使用方式
+            1. 下载对应系统的 ZIP 包
+            2. 解压后运行 `sancove.exe gui` 启动图形界面
+            3. 或使用命令行模式：`sancove.exe --help`
+
+            ### 系统要求
+            - Windows 10/11 (64位)
+
+            ### 构建信息
+            自动构建于 GitHub Actions。
+          draft: false
+          prerelease: false

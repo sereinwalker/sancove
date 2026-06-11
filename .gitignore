@@ -1,0 +1,7 @@
+/target
+*.db
+*.enc
+
+# Local dev config
+.claude/
+.playwright-mcp/
