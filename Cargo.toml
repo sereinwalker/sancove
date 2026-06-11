@@ -1,0 +1,31 @@
+[package]
+name = "sancove"
+version = "0.1.0"
+edition = "2024"
+description = "Sancove — 基于国密算法 SM4/SM3 的保密文件库，支持 GUI 和 CLI 双模式"
+authors = ["sancove contributors"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/YOUR_USERNAME/sancove"
+homepage = "https://github.com/YOUR_USERNAME/sancove"
+readme = "README.md"
+
+[dependencies]
+# 内存零化擦除，防御内存提取攻击
+zeroize = { version = "1.8", features = ["derive", "std"] }
+# 嵌入式 SQLite 数据库。启用 bundled 特征，Cargo 会自动用你的 MinGW 编译器在本地编译 SQLite 的 C 源码，避免了复杂的动态链接问题
+rusqlite = { version = "0.31", features = ["bundled", "blob"] }
+# 真随机数发生器 (CSPRNG)，用于生成 IV 和 DEK
+rand = "0.8"
+# 优雅的命令行解析
+clap = { version = "4.4", features = ["derive"] }
+# 轻量级本地二进制数据序列化（用于Layer 1的元数据信封打包）
+serde = { version = "1.0", features = ["derive"] }
+bincode = "1.3"
+# egui 图形界面框架
+eframe = "0.27"
+# 原生文件对话框（Windows/macOS/Linux）
+rfd = "0.15"
+# 临时目录，用于测试和基准测试
+tempfile = "3.10"
+# 密码终端输入隐藏回显
+rpassword = "7.3"

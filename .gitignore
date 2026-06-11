@@ -1,0 +1,13 @@
+/target
+*.db
+*.enc
+
+# Local dev config
+.claude/
+.playwright-mcp/
+
+# Cargo alias（仓库面向用户，不需要开发者快捷方式）
+.cargo/
+
+# Project report (local only, not synced to GitHub)
+REPORT.md
