@@ -43,7 +43,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libxdo-dev libxkbcommon-dev \
-            libwayland-dev libx11-dev libxrandr-dev libgl1-mesa-deps
+            libwayland-dev libx11-dev libxrandr-dev libgl1-mesa-dev
 
       - name: 缓存 Cargo 依赖
         uses: Swatinem/rust-cache@v2

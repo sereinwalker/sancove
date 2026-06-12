@@ -4,6 +4,10 @@
 //!
 //! 使用 `sancove --help` 查看所有子命令和参数说明。
 
+// Windows 子系统设置：双击直接启动 GUI 无终端弹窗。
+// CLI 模式在已有终端中（cmd/powershell）运行仍可正常输出。
+#![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
+
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
