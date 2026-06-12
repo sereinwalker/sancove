@@ -14,11 +14,21 @@ jobs:
       matrix:
         target:
           - windows-msvc
-          # 后续可添加: ubuntu-latest, macos-latest
+          - linux-x64
+          - macos-x64
         include:
           - target: windows-msvc
             os: windows-latest
             suffix: .exe
+            zip_name: sancove-windows-msvc
+          - target: linux-x64
+            os: ubuntu-latest
+            suffix: ""
+            zip_name: sancove-linux-x64
+          - target: macos-x64
+            os: macos-latest
+            suffix: ""
+            zip_name: sancove-macos-x64
 
     runs-on: ${{ matrix.os }}
 
@@ -27,6 +37,13 @@ jobs:
 
       - name: 安装 Rust 工具链
         uses: dtolnay/rust-toolchain@stable
+
+      - name: 安装 Linux 系统依赖 (egui + rfd)
+        if: matrix.target == 'linux-x64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libxdo-dev libxkbcommon-dev \
+            libwayland-dev libx11-dev libxrandr-dev libgl1-mesa-deps
 
       - name: 缓存 Cargo 依赖
         uses: Swatinem/rust-cache@v2
@@ -39,21 +56,20 @@ jobs:
         run: |
           mkdir -p artifacts
           cp target/release/sancove${{ matrix.suffix }} artifacts/
-          # 复制说明文件
           cp README.md artifacts/ 2>/dev/null || true
 
       - name: 打包 (ZIP)
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          filename: sancove-${{ matrix.target }}.zip
+          filename: ${{ matrix.zip_name }}.zip
           directory: artifacts
 
       - name: 上传发布包
         uses: actions/upload-artifact@v4
         with:
-          name: sancove-${{ matrix.target }}
-          path: artifacts/sancove-*.zip
+          name: ${{ matrix.zip_name }}
+          path: artifacts/${{ matrix.zip_name }}.zip
 
   release:
     needs: build
@@ -79,11 +95,20 @@ jobs:
 
             ### 使用方式
             1. 下载对应系统的 ZIP 包
-            2. 解压后运行 `sancove.exe gui` 启动图形界面
-            3. 或使用命令行模式：`sancove.exe --help`
+            2. 解压后运行 `sancove gui` 启动图形界面
+            3. 或使用命令行模式：`sancove --help`
 
             ### 系统要求
             - Windows 10/11 (64位)
+            - Linux (x86-64, 需 GTK3)
+            - macOS 12+ (Intel)
+
+            ### 下载说明
+            | 平台 | 包名 |
+            |------|------|
+            | Windows | sancove-windows-msvc.zip |
+            | Linux   | sancove-linux-x64.zip |
+            | macOS   | sancove-macos-x64.zip |
 
             ### 构建信息
             自动构建于 GitHub Actions。

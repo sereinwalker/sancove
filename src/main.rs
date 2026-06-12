@@ -45,8 +45,9 @@ const AUDIT_LOG_DISPLAY_LIMIT: usize = 50;
     long_about = None,
 )]
 struct Cli {
+    /// 无子命令时默认启动图形界面
     #[command(subcommand)]
-    command: Command,
+    command: Option<Command>,
 }
 
 #[derive(Subcommand)]
@@ -395,14 +396,17 @@ fn log_cli_action(vault: &Vault, entry_type: AuditEntryType, payload: &str) {
 fn main() {
     let cli = Cli::parse();
 
-    let is_gui = matches!(&cli.command, Command::Gui { .. });
+    // 无子命令时默认启动 GUI（双击 exe 直接进图形界面）
+    let command = cli.command.unwrap_or(Command::Gui { vault_dir: None });
+
+    let is_gui = matches!(&command, Command::Gui { .. });
     let password: Zeroizing<String> = if is_gui {
         Zeroizing::new(String::new())
     } else {
         read_password("请输入保险箱密码: ")
     };
 
-    let result = match &cli.command {
+    let result = match &command {
         Command::Create { vault_dir } => {
             // 创建保险箱：密码需二次确认
             let pwd = read_password_with_confirm("请设置保险箱密码: ");

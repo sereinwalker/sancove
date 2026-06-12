@@ -62,7 +62,7 @@ impl VaultApp {
                                             ui.add_sized(
                                                 [text_w, 28.0],
                                                 TextEdit::singleline(&mut self.vault_path)
-                                                    .hint_text("例如: D:\\MyVault")
+                                                    .hint_text("/path/to/vault 或 D:\\MyVault")
                                                     .desired_width(f32::INFINITY),
                                             );
                                             ui.add_sized([gap, 28.0], egui::Label::new(""));
